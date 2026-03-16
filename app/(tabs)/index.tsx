@@ -1,98 +1,131 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { useRef, useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import SignatureScreen from 'react-native-signature-canvas';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+export default function App() {
+  const [selectedRanger, setSelectedRanger] = useState(null);
+  
+  // This reference lets us talk to the drawing canvas
+  const canvasRef = useRef();
 
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
+  // This function triggers as soon as you lift your finger off the screen
+  const handleDrawFinish = () => {
+    console.log("Drawing complete! Time to Morph!");
+    // This is where we will trigger the sound effect later!
+  };
+
+  // IF a color is selected, show the Drawing Screen!
+  if (selectedRanger !== null) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Draw {selectedRanger} Power!</Text>
+        
+        {/* The actual drawing board */}
+        <View style={styles.canvasArea}>
+            <SignatureScreen
+                ref={canvasRef}
+                onEnd={handleDrawFinish}
+                autoClear={false}
+                descriptionText="Draw your symbol"
+                // This hides the default "Clear" and "Save" buttons the library comes with so it looks cleaner
+                webStyle={`.m-signature-pad--footer {display: none; margin: 0px;}`}
             />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+        </View>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        {/* Custom buttons below the canvas */}
+        <View style={styles.buttonRow}>
+          <TouchableOpacity style={styles.actionButton} onPress={() => canvasRef.current.clearSignature()}>
+            <Text style={styles.buttonText}>Clear</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.actionButton} onPress={() => setSelectedRanger(null)}>
+            <Text style={styles.buttonText}>Menu</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
+  // Otherwise, show the main Menu Screen
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Select Your Power</Text>
+
+      <TouchableOpacity style={[styles.button, { backgroundColor: '#FF0000' }]} onPress={() => setSelectedRanger('Fire')}>
+        <Text style={styles.buttonText}>Fire (Red)</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={[styles.button, { backgroundColor: '#0000FF' }]} onPress={() => setSelectedRanger('Water')}>
+        <Text style={styles.buttonText}>Water (Blue)</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={[styles.button, { backgroundColor: '#008000' }]} onPress={() => setSelectedRanger('Wood')}>
+        <Text style={styles.buttonText}>Wood (Green)</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={[styles.button, { backgroundColor: '#FFD700' }]} onPress={() => setSelectedRanger('Earth')}>
+        <Text style={styles.buttonText}>Earth (Yellow)</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={[styles.button, { backgroundColor: '#FFC0CB' }]} onPress={() => setSelectedRanger('Sky')}>
+        <Text style={styles.buttonText}>Sky (Pink)</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container: {
+    flex: 1,
+    backgroundColor: '#1a1a1a',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'center',
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  title: {
+    color: '#fff',
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textTransform: 'uppercase',
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  button: {
+    width: 220,
+    padding: 15,
+    borderRadius: 8,
+    marginVertical: 10,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#fff',
   },
+  buttonText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3
+  },
+  canvasArea: {
+    width: 320,
+    height: 350,
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    marginVertical: 20,
+    overflow: 'hidden', // Keeps the drawing inside the rounded corners
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: 320,
+    marginTop: 10,
+  },
+  actionButton: {
+    backgroundColor: '#333',
+    padding: 15,
+    borderRadius: 8,
+    width: 150,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#fff',
+  }
 });
